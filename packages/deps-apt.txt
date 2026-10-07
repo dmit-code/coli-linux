@@ -1,0 +1,8 @@
+# Зависимости сборки для Debian / Ubuntu / Mint (apt)
+# Одна строка — один пакет. Если apt ругается на пакет — убери его отсюда.
+git
+rsync
+wget
+curl
+squashfs-tools
+xorriso
