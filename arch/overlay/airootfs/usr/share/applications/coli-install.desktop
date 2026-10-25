@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Установить COLI Linux
+Name[en]=Install COLI Linux
+Comment=Запустить установщик archinstall
+Exec=kgx -e sudo archinstall
+Icon=coli-linux
+Terminal=false
+Categories=System;

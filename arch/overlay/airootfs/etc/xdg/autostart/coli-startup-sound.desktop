@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=COLI Linux startup sound
+Exec=/usr/lib/coli/play-startup-sound
+OnlyShowIn=GNOME;
+NoDisplay=true
+X-GNOME-Autostart-Delay=2
