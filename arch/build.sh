@@ -4,7 +4,7 @@
 #   bash arch/build.sh
 # Готовый образ: build/arch-out/coli-linux-*.iso
 #
-# Нужны пакеты: sudo pacman -S --needed archiso git dconf
+# Нужны пакеты: sudo pacman -S --needed archiso git dconf base-devel pacman-contrib
 # Перед сборкой обнови систему: sudo pacman -Syu
 set -euo pipefail
 
@@ -22,8 +22,59 @@ if [ "$(id -u)" -ne 0 ]; then SUDO="sudo"; fi
 die()  { echo "ОШИБКА: $*" >&2; exit 1; }
 warn() { echo "!! $*" >&2; }
 
-for c in mkarchiso pacman dconf awk sed; do
-  command -v "$c" >/dev/null 2>&1 || die "нет программы $c (поставь: sudo pacman -S --needed archiso git dconf)"
+if [ "$(id -u)" -eq 0 ]; then
+  die "запусти сборку обычным пользователем (makepkg запрещено запускать от root)"
+fi
+
+CALAMARES_REPO_DIR=""
+cleanup_calamares_repo() {
+  if [ -n "$CALAMARES_REPO_DIR" ] && [ -d "$CALAMARES_REPO_DIR" ]; then
+    rm -rf -- "$CALAMARES_REPO_DIR"
+  fi
+}
+trap cleanup_calamares_repo EXIT
+
+build_calamares_aur() {
+  local aur_dir="$ROOT/build/aur/calamares-git"
+  local pkg
+  mkdir -p "$(dirname "$aur_dir")"
+  if [ -d "$aur_dir/.git" ]; then
+    git -C "$aur_dir" pull --ff-only || die "не удалось обновить calamares-git из AUR"
+  else
+    git clone --depth 1 https://aur.archlinux.org/calamares-git.git "$aur_dir" || die "не удалось скачать calamares-git из AUR"
+  fi
+
+  rm -f "$aur_dir"/calamares-git-*.pkg.tar.zst "$aur_dir"/calamares-git-debug-*.pkg.tar.zst
+  (cd "$aur_dir" && makepkg --syncdeps --noconfirm --cleanbuild)
+  pkg="$(find "$aur_dir" -maxdepth 1 -type f -name 'calamares-git-*.pkg.tar.zst' ! -name 'calamares-git-debug-*.pkg.tar.zst' -print -quit)"
+  [ -n "$pkg" ] || die "makepkg не создал пакет calamares-git"
+
+  CALAMARES_REPO_DIR="$(mktemp -d /var/tmp/coli-calamares-repo.XXXXXX)"
+  cp -- "$pkg" "$CALAMARES_REPO_DIR/"
+  repo-add "$CALAMARES_REPO_DIR/coli-local.db.tar.gz" "$CALAMARES_REPO_DIR/$(basename "$pkg")" >/dev/null
+}
+
+configure_calamares_repo() {
+  local conf="$P/pacman.conf"
+  local tmp="$P/pacman.conf.new"
+  [ -s "$CALAMARES_REPO_DIR/coli-local.db.tar.gz" ] || die "локальный репозиторий Calamares не собран"
+  awk -v repo="file://$CALAMARES_REPO_DIR" '
+    /^\[core\]$/ && !inserted {
+      print "[coli-local]"
+      print "SigLevel = Optional TrustAll"
+      print "Server = " repo
+      print ""
+      inserted = 1
+    }
+    { print }
+    END { if (!inserted) exit 2 }
+  ' "$conf" > "$tmp" || die "не удалось подключить локальный репозиторий в pacman.conf"
+  mv "$tmp" "$conf"
+  grep -qx 'calamares-git' "$P/packages.x86_64" || echo 'calamares-git' >> "$P/packages.x86_64"
+}
+
+for c in mkarchiso pacman dconf awk sed git makepkg repo-add; do
+  command -v "$c" >/dev/null 2>&1 || die "нет программы $c (поставь: sudo pacman -S --needed archiso git dconf base-devel pacman-contrib)"
 done
 [ -d "$RELENG" ] || die "нет шаблона $RELENG (пакет archiso)"
 pacman -Si bash >/dev/null 2>&1 || die "база пакетов пустая: выполни sudo pacman -Syu"
@@ -41,7 +92,9 @@ sed -i -e 's|^iso_name=.*|iso_name="coli-linux"|' \
        -e 's|^iso_application=.*|iso_application="COLI Linux Live"|' "$P/profiledef.sh"
 grep -E '^(iso_name|iso_label|iso_publisher|iso_application)=' "$P/profiledef.sh"
 
-echo "==> [3/8] Пакеты"
+echo "==> [3/8] Сборка Calamares-git из AUR и пакеты"
+build_calamares_aur
+configure_calamares_repo
 while IFS= read -r line; do
   pkg="${line%%#*}"; pkg="$(echo $pkg)"
   [ -n "$pkg" ] || continue
