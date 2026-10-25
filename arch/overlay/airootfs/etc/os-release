@@ -1,0 +1,8 @@
+NAME="COLI Linux"
+PRETTY_NAME="COLI Linux"
+ID=coli
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;47;107;255"
+HOME_URL="https://github.com/dmit-code/coli-linux"
+LOGO=coli-linux

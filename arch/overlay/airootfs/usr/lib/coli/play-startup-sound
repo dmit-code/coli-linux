@@ -1,0 +1,9 @@
+#!/bin/sh
+# Звук запуска COLI Linux: играет один раз при входе в рабочий стол.
+F=/usr/share/sounds/coli/startup.ogg
+[ -f "$F" ] || exit 0
+sleep 1
+if command -v pw-play >/dev/null 2>&1; then exec pw-play "$F"; fi
+if command -v paplay >/dev/null 2>&1; then exec paplay "$F"; fi
+if command -v canberra-gtk-play >/dev/null 2>&1; then exec canberra-gtk-play -f "$F"; fi
+exit 0

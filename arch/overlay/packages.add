@@ -1,0 +1,53 @@
+# Пакеты COLI Linux поверх базового набора archiso. Одна строка = один пакет.
+# Несуществующие пакеты сборка пропускает и пишет предупреждение.
+
+# рабочий стол GNOME
+gnome-shell
+gnome-session
+gdm
+gnome-control-center
+gnome-settings-daemon
+gnome-keyring
+nautilus
+gnome-console
+gnome-text-editor
+gnome-system-monitor
+gnome-disk-utility
+gnome-calculator
+gnome-tweaks
+gnome-shell-extensions
+loupe
+papers
+xdg-desktop-portal-gnome
+xdg-user-dirs-gtk
+gvfs
+gvfs-mtp
+gvfs-smb
+adwaita-icon-theme
+
+# сеть, блютуз, звук
+networkmanager
+wpa_supplicant
+bluez
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+
+# шрифты
+ttf-dejavu
+noto-fonts
+noto-fonts-emoji
+
+# программы
+firefox
+git
+nano
+vim
+sudo
+
+# заставка загрузки
+plymouth
+
+# гостевые добавления, если запускаешь образ в VirtualBox
+virtualbox-guest-utils

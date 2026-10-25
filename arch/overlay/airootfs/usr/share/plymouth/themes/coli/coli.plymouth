@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=COLI Linux
+Description=Анимация загрузки COLI Linux
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/coli
+ScriptFile=/usr/share/plymouth/themes/coli/coli.script

@@ -1,0 +1,168 @@
+# COLI Linux: анимация загрузки.
+# Разгон знака -> вспышка и вихрь -> спокойное вращение до конца загрузки.
+
+Window.SetBackgroundTopColor(0.0196, 0.0275, 0.0510);
+Window.SetBackgroundBottomColor(0.0196, 0.0275, 0.0510);
+
+global.sw = Window.GetWidth();
+global.sh = Window.GetHeight();
+global.cx = global.sw / 2;
+global.cy = global.sh * 0.46;
+global.D = global.sh * 0.36;               # диаметр знака на экране
+if (global.D > global.sw * 0.6) global.D = global.sw * 0.6;
+
+fun load_scaled(name, w) {
+  local.img = Image(name);
+  local.h = Math.Int(w * img.GetHeight() / img.GetWidth());
+  return img.Scale(Math.Int(w), h);
+}
+
+# знак: картинка 490 px, сам знак внутри около 476 px
+global.imgw = global.D * 490 / 476;
+global.blades_img = load_scaled("blades.png", global.imgw);
+global.arcs_img = load_scaled("arcs.png", global.imgw);
+global.glow_img = load_scaled("glow.png", global.D * 2.4);
+global.word_img = load_scaled("wordmark.png", global.D * 0.95);
+
+global.bn = 0;
+while (global.bn < 16) {
+  global.burst_src[global.bn] = Image("burst-" + global.bn + ".png");
+  global.bn = global.bn + 1;
+}
+global.burst_size = Math.Int(global.D * 2.4);
+global.burst_idx = -1;
+
+global.glow = Sprite(global.glow_img);
+global.glow.SetZ(1);
+global.glow.SetOpacity(0);
+global.glow.SetX(global.cx - global.glow_img.GetWidth() / 2);
+global.glow.SetY(global.cy - global.glow_img.GetHeight() / 2);
+
+global.burst = Sprite();
+global.burst.SetZ(2);
+global.burst.SetOpacity(0);
+
+global.ghost2 = Sprite();  global.ghost2.SetZ(3);  global.ghost2.SetOpacity(0);
+global.ghost1 = Sprite();  global.ghost1.SetZ(4);  global.ghost1.SetOpacity(0);
+global.blades = Sprite();  global.blades.SetZ(5);  global.blades.SetOpacity(0);
+global.arcs = Sprite();    global.arcs.SetZ(6);    global.arcs.SetOpacity(0);
+
+global.word = Sprite(global.word_img);
+global.word.SetZ(7);
+global.word.SetOpacity(0);
+global.word.SetX(global.cx - global.word_img.GetWidth() / 2);
+global.word.SetY(global.cy + global.D * 0.5 + global.D * 0.12);
+
+global.counter = 0;
+global.theta = 0;
+global.TB = 2.6;                            # момент вспышки, секунды
+
+fun smooth(x) {
+  if (x < 0) x = 0;
+  if (x > 1) x = 1;
+  return x * x * (3 - 2 * x);
+}
+
+# угловая скорость лезвий, рад/с
+fun omega(t) {
+  local.w = 0.3;
+  if (t < 0.7) {
+    w = 0.25 + 0.17 * t;
+  } else if (t < global.TB) {
+    local.s = smooth((t - 0.7) / 1.9);
+    w = 0.35 + 13.0 * s * s;
+  } else {
+    local.d = 1 - smooth((t - global.TB) / 1.8);
+    w = 0.7 + 12.6 * d * d;
+  }
+  return w;
+}
+
+fun place(sprite, img) {
+  sprite.SetImage(img);
+  sprite.SetX(global.cx - img.GetWidth() / 2);
+  sprite.SetY(global.cy - img.GetHeight() / 2);
+}
+
+fun refresh() {
+  global.counter = global.counter + 1;
+  local.t = global.counter / 50;
+  local.om = omega(t);
+  global.theta = global.theta + om / 50;
+
+  local.fade = smooth(t / 0.7);
+
+  # лезвия и дуги вращаются в разные стороны
+  local.bimg = global.blades_img.Rotate(0 - global.theta);
+  place(global.blades, bimg);
+  global.blades.SetOpacity(fade);
+  local.aimg = global.arcs_img.Rotate(0.55 * global.theta);
+  place(global.arcs, aimg);
+  global.arcs.SetOpacity(fade);
+
+  # след от вращения при большой скорости
+  if (om > 3) {
+    local.g1 = global.blades_img.Rotate(0 - (global.theta - om * 0.010));
+    place(global.ghost1, g1);
+    global.ghost1.SetOpacity(0.35 * fade);
+    local.g2 = global.blades_img.Rotate(0 - (global.theta - om * 0.022));
+    place(global.ghost2, g2);
+    global.ghost2.SetOpacity(0.18 * fade);
+  } else {
+    global.ghost1.SetOpacity(0);
+    global.ghost2.SetOpacity(0);
+  }
+
+  # свечение: растёт при разгоне, вспыхивает и гаснет до ровного уровня
+  local.gl = 0.08 + 0.22 * smooth(t / global.TB);
+  if (t > global.TB) {
+    local.f = 1 - smooth((t - global.TB) / 1.0);
+    gl = 0.30 + 0.60 * f;
+  }
+  global.glow.SetOpacity(gl * fade);
+
+  # вихрь после вспышки: 16 кадров за 1,26 с
+  if (t >= global.TB && t < global.TB + 1.26) {
+    local.idx = Math.Int((t - global.TB) / 1.26 * 16);
+    if (idx > 15) idx = 15;
+    if (idx != global.burst_idx) {
+      global.burst_idx = idx;
+      local.bi = global.burst_src[idx].Scale(global.burst_size, global.burst_size);
+      place(global.burst, bi);
+    }
+    global.burst.SetOpacity(1);
+  } else {
+    global.burst.SetOpacity(0);
+  }
+
+  # надпись появляется после вспышки
+  global.word.SetOpacity(smooth((t - global.TB - 0.2) / 0.7));
+}
+
+Plymouth.SetRefreshFunction(refresh);
+
+# запрос пароля (шифрование диска)
+global.pw = Sprite();
+global.pw.SetZ(100);
+global.pw.SetOpacity(0);
+
+fun display_password_callback(prompt, bullets) {
+  local.s = prompt + " ";
+  local.i = 0;
+  while (i < bullets) {
+    s = s + "*";
+    i = i + 1;
+  }
+  local.img = Image.Text(s, 1, 1, 1);
+  global.pw.SetImage(img);
+  global.pw.SetX(global.cx - img.GetWidth() / 2);
+  global.pw.SetY(global.sh * 0.88);
+  global.pw.SetOpacity(1);
+}
+
+fun display_normal_callback() {
+  global.pw.SetOpacity(0);
+}
+
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
