@@ -46,6 +46,13 @@ nano
 vim
 sudo
 
+# Официальный текстовый установщик и зависимости графической оболочки
+archinstall
+gtk4
+python-gobject
+tzdata
+tzdata
+
 # заставка загрузки
 plymouth
 
