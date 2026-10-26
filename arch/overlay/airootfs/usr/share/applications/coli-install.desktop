@@ -2,8 +2,9 @@
 Type=Application
 Name=Установить COLI Linux
 Name[en]=Install COLI Linux
-Comment=Запустить установщик archinstall
-Exec=kgx -e sudo archinstall
+Comment=Запустить графический установщик Calamares
+Comment[en]=Launch the Calamares graphical installer
+Exec=sudo -E calamares
 Icon=coli-linux
 Terminal=false
 Categories=System;
