@@ -51,19 +51,9 @@ archinstall
 gtk4
 python-gobject
 tzdata
-tzdata
 
 # заставка загрузки
 plymouth
 
 # гостевые добавления, если запускаешь образ в VirtualBox
 virtualbox-guest-utils
-
-# Инструменты Calamares для установки в UEFI/BIOS и создания файловых систем
-grub
-efibootmgr
-dosfstools
-e2fsprogs
-btrfs-progs
-rsync
-squashfs-tools
