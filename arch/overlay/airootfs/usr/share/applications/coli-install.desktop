@@ -2,8 +2,10 @@
 Type=Application
 Name=Установить COLI Linux
 Name[en]=Install COLI Linux
-Comment=Запустить установщик archinstall
-Exec=kgx -e sudo archinstall
+Comment=Графический мастер установки COLI Linux
+Comment[en]=Graphical COLI Linux installation wizard
+Exec=python /usr/lib/coli/installer-gui.py
 Icon=coli-linux
 Terminal=false
+StartupNotify=true
 Categories=System;
