@@ -55,8 +55,6 @@ def list_install_disks() -> list[dict]:
         path = disk.get("path") or ("/dev/" + str(disk.get("name", "")))
         if path == live_disk:
             continue
-        if path == live_disk:
-            continue
         model = " ".join(str(disk.get("model") or "").split()) or "Диск"
         transport = str(disk.get("tran") or "").upper()
         removable = bool(disk.get("rm"))
