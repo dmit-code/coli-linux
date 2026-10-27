@@ -6,14 +6,16 @@
 
 ```bash
 sudo pacman -Syu
-sudo pacman -S --needed archiso git dconf base-devel pacman-contrib
+sudo pacman -S --needed archiso git dconf
 ```
 
-`arch/build.sh` копирует профиль `releng`, накладывает настройки COLI и запускает `mkarchiso`. Во время сборки он скачивает PKGBUILD `calamares-git` из AUR, собирает пакет от имени текущего пользователя и временно подключает его через локальный pacman-репозиторий. AUR — пользовательский источник: перед сборкой можно просмотреть PKGBUILD в каталоге `build/aur/calamares-git`.
+`arch/build.sh` копирует профиль `releng`, добавляет пакеты и настройки COLI, а затем запускает `mkarchiso`. Установщик в меню приложений запускает официальный текстовый `archinstall` в GNOME Console.
 
-- `overlay/packages.add` — пакеты поверх базового набора.
-- `overlay/airootfs/` — файлы live-системы; настройки Calamares лежат в `etc/calamares/`.
-- Calamares использует `airootfs.sfs` с live-образа и настраивает GRUB для установленной системы.
+- `overlay/packages.add` — дополнительные пакеты live-системы, включая `archinstall` и GRUB.
+- `overlay/airootfs/` — файлы и настройки live-системы.
+- `overlay/grub/grub.cfg` — меню GRUB для UEFI-загрузки ISO.
+- ISO использует GRUB при загрузке через UEFI; Syslinux сохранён для старых BIOS-систем, поскольку archiso поддерживает GRUB для UEFI, а Syslinux для BIOS.
+- Выбор загрузчика установленной системы — отдельный параметр внутри `archinstall`; настройка загрузчика ISO сама по себе его не задаёт.
 - `overlay/dconf/coli.d/00-coli` — настройки GNOME по умолчанию (тема, обои, закрепы в доке).
 - Обои берутся из `rootfs/usr/share/backgrounds/coli/*.png`.
 - Готовый образ: `build/arch-out/coli-linux-*.iso`.
