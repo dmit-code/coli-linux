@@ -41,6 +41,15 @@ sed -i -e 's|^iso_name=.*|iso_name="coli-linux"|' \
        -e 's|^iso_application=.*|iso_application="COLI Linux Live"|' "$P/profiledef.sh"
 grep -E '^(iso_name|iso_label|iso_publisher|iso_application)=' "$P/profiledef.sh"
 
+# GRUB is used for UEFI boot; keep Syslinux for legacy BIOS compatibility.
+cat >> "$P/profiledef.sh" <<'EOF'
+bootmodes=('bios.syslinux' 'uefi.grub')
+EOF
+mkdir -p "$P/grub"
+[ -f "$OVERLAY/grub/grub.cfg" ] || die "нет профиля GRUB: $OVERLAY/grub/grub.cfg"
+cp "$OVERLAY/grub/grub.cfg" "$P/grub/grub.cfg"
+grep -E '^bootmodes=' "$P/profiledef.sh"
+
 echo "==> [3/8] Пакеты установщика и рабочего стола"
 while IFS= read -r line; do
   pkg="${line%%#*}"; pkg="$(echo $pkg)"
