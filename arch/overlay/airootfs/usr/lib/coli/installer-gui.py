@@ -130,13 +130,15 @@ class InstallerWindow:
         self.username_entry.set_placeholder_text("латиницей, без пробелов")
         self.add_row(3, "Имя пользователя", self.username_entry)
 
-        self.password_entry = Gtk.PasswordEntry()
-        self.password_entry.set_show_peek_icon(True)
+        self.password_entry = Gtk.Entry()
+        self.password_entry.set_visibility(False)
+        self.password_entry.set_input_purpose(Gtk.InputPurpose.PASSWORD)
         self.password_entry.set_placeholder_text("не менее 8 символов")
         self.add_row(4, "Пароль пользователя", self.password_entry)
 
-        self.password2_entry = Gtk.PasswordEntry()
-        self.password2_entry.set_show_peek_icon(True)
+        self.password2_entry = Gtk.Entry()
+        self.password2_entry.set_visibility(False)
+        self.password2_entry.set_input_purpose(Gtk.InputPurpose.PASSWORD)
         self.password2_entry.set_placeholder_text("повторите пароль")
         self.add_row(5, "Повтор пароля", self.password2_entry)
 
