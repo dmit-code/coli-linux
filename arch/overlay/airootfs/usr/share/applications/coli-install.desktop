@@ -2,9 +2,9 @@
 Type=Application
 Name=Установить COLI Linux
 Name[en]=Install COLI Linux
-Comment=Запустить официальный текстовый установщик archinstall в терминале
-Comment[en]=Run the official text-mode archinstall installer in a terminal
-Exec=kgx -e sudo archinstall
+Comment=Установка COLI Linux через понятный мастер Archinstall
+Comment[en]=Install COLI Linux with the guided Archinstall wizard
+Exec=kgx -e bash /usr/local/lib/coli/coli-installer.sh
 Icon=coli-linux
 Terminal=false
 StartupNotify=true

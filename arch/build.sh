@@ -22,7 +22,7 @@ if [ "$(id -u)" -ne 0 ]; then SUDO="sudo"; fi
 die()  { echo "ОШИБКА: $*" >&2; exit 1; }
 warn() { echo "!! $*" >&2; }
 
-for c in mkarchiso pacman dconf awk sed; do
+for c in mkarchiso pacman dconf awk sed python3; do
   command -v "$c" >/dev/null 2>&1 || die "нет программы $c (поставь: sudo pacman -S --needed archiso dconf)"
 done
 [ -d "$RELENG" ] || die "нет шаблона $RELENG (пакет archiso)"
@@ -48,6 +48,8 @@ EOF
 mkdir -p "$P/grub"
 [ -f "$OVERLAY/grub/grub.cfg" ] || die "нет профиля GRUB: $OVERLAY/grub/grub.cfg"
 cp "$OVERLAY/grub/grub.cfg" "$P/grub/grub.cfg"
+[ -f "$ROOT/isofs/boot/grub/coli-bg.png" ] || die "нет фона GRUB: $ROOT/isofs/boot/grub/coli-bg.png"
+cp "$ROOT/isofs/boot/grub/coli-bg.png" "$P/grub/coli-bg.png"
 grep -E '^bootmodes=' "$P/profiledef.sh"
 
 echo "==> [3/8] Пакеты установщика и рабочего стола"
@@ -118,9 +120,12 @@ else
   warn "в rootfs/usr/share/backgrounds/coli нет PNG: останется стандартный фон"
 fi
 
-echo "==> [6/8] Настройки GNOME по умолчанию (dconf)"
+echo "==> [6/8] Настройки GNOME и профиль установщика"
 mkdir -p "$P/airootfs/etc/dconf/db"
 dconf compile "$P/airootfs/etc/dconf/db/coli" "$OVERLAY/dconf/coli.d"
+python3 "$ARCH_DIR/scripts/make_archinstall_defaults.py" \
+  --repo-root "$ROOT" --overlay "$OVERLAY" --live-root "$P/airootfs" \
+  --output "$P/airootfs/usr/share/coli/archinstall/defaults.json"
 
 echo "==> [7/8] Живой пользователь, службы, заставка"
 A="$P/airootfs/etc"
