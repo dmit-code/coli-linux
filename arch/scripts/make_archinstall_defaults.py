@@ -97,6 +97,7 @@ def main() -> None:
             "greeter": "gdm",
             "profile": {"main": "Desktop", "details": ["GNOME"]},
         },
+        "network_config": {"type": "nm"},
         "services": ["NetworkManager", "gdm"],
         "audio_config": {"audio": "pipewire"},
         "packages": ["firefox"],
