@@ -98,7 +98,7 @@ def main() -> None:
             "profile": {"main": "Desktop", "details": ["GNOME"]},
         },
         "services": ["NetworkManager", "gdm"],
-        "audio_config": "pipewire",
+        "audio_config": {"audio": "pipewire"},
         "packages": ["firefox"],
         "custom_commands": [post_install],
     }
