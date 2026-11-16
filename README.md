@@ -7,6 +7,10 @@
   <a href="https://github.com/dmit-code/coli-linux/commits/main"><img alt="Latest commit" src="https://img.shields.io/github/last-commit/dmit-code/coli-linux?style=for-the-badge&color=111827"></a>
 </p>
 
+<p align="center">
+  <img src="assets/coli-linux-first-release.png" alt="COLI Linux — first release" width="100%">
+</p>
+
 ## Overview
 
 COLI Linux is an Arch-based live ISO customized with the GNOME desktop, COLI branding, and an interactive Archinstall flow.
